@@ -193,6 +193,17 @@ button:hover {
     background-color: #15803d;
 }
 
+.btn-warning {
+    background-color: #d97706;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: #ffffff;
+}
+
+.btn-warning:hover {
+    background-color: #b45309;
+}
+
 .table-wrapper {
     overflow-x: auto;
 }
@@ -270,9 +281,14 @@ th {
     gap: 12px;
 }
 
+.modal-large {
+    max-width: 600px;
+}
+
 .modal-actions {
     display: flex;
     gap: 10px;
+    justify-content: flex-end;
 }
 
 .hint {

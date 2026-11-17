@@ -200,6 +200,10 @@ function renderizarLeitores() {
                 <td>${leitor.nome}</td>
                 <td>${leitor.email}</td>
                 <td>${qtdAtivos}</td>
+                <td>
+                    <button class="btn-secondary" style="padding: 6px 10px; font-size: 0.8rem;" onclick="abrirHistoricoLeitor('${leitor.cpf}')">Histórico</button>
+                    <button class="btn-danger" style="padding: 6px 10px; font-size: 0.8rem;" onclick="excluirLeitor('${leitor.cpf}')">Excluir</button>
+                </td>
             </tr>
         `;
     }).join("");
@@ -234,6 +238,68 @@ document.getElementById("formLeitor").addEventListener("submit", (e) => {
     msg.textContent = "Leitor cadastrado com sucesso.";
     renderizarLeitores();
 });
+
+function excluirLeitor(cpf) {
+    const temAtivo = emprestimos.some(emp => emp.cpfLeitor === cpf && emp.status === "Ativo");
+    if (temAtivo) {
+        alert("Não é possível excluir um leitor que possui empréstimos ativos.");
+        return;
+    }
+    leitores = leitores.filter(l => l.cpf !== cpf);
+    salvarDados();
+    renderizarLeitores();
+}
+
+const modalHistorico = document.getElementById("modalHistorico");
+document.getElementById("btnFecharHistorico").addEventListener("click", () => {
+    modalHistorico.classList.add("hidden");
+});
+
+function abrirHistoricoLeitor(cpf) {
+    const leitor = leitores.find(l => l.cpf === cpf);
+    if (!leitor) return;
+
+    const historicoDoLeitor = emprestimos.filter(e => e.cpfLeitor === cpf);
+    const container = document.getElementById("conteudoHistoricoLeitor");
+
+    let html = `<p><strong>Leitor:</strong> ${leitor.nome} (CPF: ${leitor.cpf})</p>`;
+    if (historicoDoLeitor.length === 0) {
+        html += `<p style="margin-top: 12px; color: #6b7280;">Nenhum empréstimo registrado para este leitor.</p>`;
+    } else {
+        html += `
+            <div class="table-wrapper" style="margin-top: 12px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Livro</th>
+                            <th>Retirada</th>
+                            <th>Prevista</th>
+                            <th>Status</th>
+                            <th>Multa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        historicoDoLeitor.forEach(emp => {
+            const livro = acervo.find(l => l.isbn === emp.isbn);
+            html += `
+                <tr>
+                    <td>#${emp.idEmprestimo}</td>
+                    <td>${livro ? livro.titulo : emp.isbn}</td>
+                    <td>${emp.dataEmprestimo}</td>
+                    <td>${emp.dataDevolucaoPrevista}</td>
+                    <td><span class="badge ${emp.status === "Ativo" ? "badge-warn" : "badge-ok"}">${emp.status}</span></td>
+                    <td>R$ ${emp.multa.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        html += `</tbody></table></div>`;
+    }
+
+    container.innerHTML = html;
+    modalHistorico.classList.remove("hidden");
+}
 
 function atualizarSelectsEmprestimo() {
     const selectLeitor = document.getElementById("selectLeitor");
@@ -277,7 +343,10 @@ function renderizarEmprestimos() {
                 <td>R$ ${emp.multa.toFixed(2)}</td>
                 <td>
                     ${emp.status === "Ativo"
-                        ? `<button class="btn-success" onclick="registrarDevolucao(${emp.idEmprestimo})">Devolver</button>`
+                        ? `
+                            <button class="btn-success" onclick="registrarDevolucao(${emp.idEmprestimo})">Devolver</button>
+                            <button class="btn-warning" onclick="renovarEmprestimo(${emp.idEmprestimo})">Renovar</button>
+                          `
                         : `Devolvido em ${emp.dataDevolucaoReal}`
                     }
                 </td>
@@ -322,6 +391,19 @@ document.getElementById("formEmprestimo").addEventListener("submit", (e) => {
     renderizarAcervo();
     renderizarEmprestimos();
 });
+
+function renovarEmprestimo(idEmprestimo) {
+    const emp = emprestimos.find(e => e.idEmprestimo === idEmprestimo);
+    if (!emp || emp.status !== "Ativo") return;
+
+    const dataAtualPrevista = new Date(emp.dataDevolucaoPrevista + "T00:00:00");
+    dataAtualPrevista.setDate(dataAtualPrevista.getDate() + 7);
+    emp.dataDevolucaoPrevista = dataAtualPrevista.toISOString().split("T")[0];
+
+    salvarDados();
+    renderizarEmprestimos();
+    alert(`Empréstimo #${emp.idEmprestimo} renovado com sucesso por mais 7 dias! Nova data: ${emp.dataDevolucaoPrevista}`);
+}
 
 function registrarDevolucao(idEmprestimo) {
     const emp = emprestimos.find(e => e.idEmprestimo === idEmprestimo);
