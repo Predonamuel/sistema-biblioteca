@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca Central — Sistema de Gestão</title>
+    <meta name="theme-color" content="#121417">
+    <title>Biblioteca Central — Acervo e Leitura</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="ambient-light" aria-hidden="true"></div>
+
     <header class="site-header">
         <div class="header-inner">
             <div class="brand-group">
-                <span class="brand-badge">Sistema</span>
-                <h1>Biblioteca Central</h1>
+                <span class="brand-mark" aria-hidden="true">BC</span>
+                <div class="brand-text">
+                    <span class="brand-badge">Est. Acervo Digital</span>
+                    <h1>Biblioteca Central</h1>
+                </div>
             </div>
             <div class="auth-toolbar" id="authArea">
                 <span id="statusAdmin" class="badge badge-offline">Modo Leitor</span>
@@ -25,19 +31,20 @@
     </header>
 
     <div id="modalLogin" class="modal-backdrop hidden">
-        <div class="modal-card">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloModalLogin">
             <div class="modal-header">
-                <h2>Credenciais de Acesso</h2>
+                <span class="modal-eyebrow">Área Restrita</span>
+                <h2 id="tituloModalLogin">Credenciais de Acesso</h2>
                 <p class="modal-subtitle">Utilize sua matrícula administrativa para gerenciar o acervo.</p>
             </div>
             <div class="modal-body">
                 <div class="input-group">
                     <label for="loginMatricula">Matrícula</label>
-                    <input type="text" id="loginMatricula" placeholder="admin">
+                    <input type="text" id="loginMatricula" placeholder="admin" autocomplete="username">
                 </div>
                 <div class="input-group">
                     <label for="loginSenha">Senha</label>
-                    <input type="password" id="loginSenha" placeholder="••••••••">
+                    <input type="password" id="loginSenha" placeholder="••••••••" autocomplete="current-password">
                 </div>
             </div>
             <div class="modal-footer">
@@ -49,9 +56,10 @@
     </div>
 
     <div id="modalHistorico" class="modal-backdrop hidden">
-        <div class="modal-card modal-wide">
+        <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="tituloModalHistorico">
             <div class="modal-header">
-                <h2>Histórico do Leitor</h2>
+                <span class="modal-eyebrow">Ficha de Circulação</span>
+                <h2 id="tituloModalHistorico">Histórico do Leitor</h2>
             </div>
             <div id="conteudoHistoricoLeitor" class="modal-body scrollable"></div>
             <div class="modal-footer">
@@ -61,26 +69,50 @@
     </div>
 
     <main class="main-container">
-        <section class="metrics-grid">
-            <div class="metric-card">
-                <span class="metric-label">Títulos Cadastrados</span>
-                <strong class="metric-value" id="statTotalLivros">0</strong>
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="hero-eyebrow">Catálogo Geral &middot; Edição Contínua</span>
+                <h2 class="hero-title">Um acervo vivo, <em>organizado para quem lê.</em></h2>
+                <p class="hero-lead">Consulte obras, acompanhe a circulação de exemplares e descubra o que está disponível nas estantes agora mesmo.</p>
             </div>
-            <div class="metric-card">
-                <span class="metric-label">Exemplares Disponíveis</span>
-                <strong class="metric-value" id="statDisponiveis">0</strong>
-            </div>
-            <div class="metric-card">
-                <span class="metric-label">Leitores Registrados</span>
-                <strong class="metric-value" id="statTotalLeitores">0</strong>
-            </div>
-            <div class="metric-card">
-                <span class="metric-label">Empréstimos Ativos</span>
-                <strong class="metric-value" id="statEmprestimosAtivos">0</strong>
+            <div class="hero-shelf" aria-hidden="true">
+                <span class="spine spine-1"></span>
+                <span class="spine spine-2"></span>
+                <span class="spine spine-3"></span>
+                <span class="spine spine-4"></span>
+                <span class="spine spine-5"></span>
+                <span class="spine spine-6"></span>
+                <span class="spine spine-7"></span>
+                <span class="spine spine-8"></span>
+                <span class="spine spine-9"></span>
+                <span class="shelf-board"></span>
             </div>
         </section>
 
-        <nav class="navigation-tabs">
+        <section class="metrics-grid">
+            <div class="metric-card metric-bordo">
+                <span class="metric-label">Títulos Cadastrados</span>
+                <strong class="metric-value" id="statTotalLivros">0</strong>
+                <span class="metric-foot">Obras no catálogo</span>
+            </div>
+            <div class="metric-card metric-floresta">
+                <span class="metric-label">Exemplares Disponíveis</span>
+                <strong class="metric-value" id="statDisponiveis">0</strong>
+                <span class="metric-foot">Prontos para retirada</span>
+            </div>
+            <div class="metric-card metric-ambar">
+                <span class="metric-label">Leitores Registrados</span>
+                <strong class="metric-value" id="statTotalLeitores">0</strong>
+                <span class="metric-foot">Fichas ativas</span>
+            </div>
+            <div class="metric-card metric-terracota">
+                <span class="metric-label">Empréstimos Ativos</span>
+                <strong class="metric-value" id="statEmprestimosAtivos">0</strong>
+                <span class="metric-foot">Em circulação</span>
+            </div>
+        </section>
+
+        <nav class="navigation-tabs" aria-label="Seções do sistema">
             <button class="tab-btn active" data-tab="tabAcervo">Consultar Acervo</button>
             <button class="tab-btn admin-only hidden" data-tab="tabLivros">Gerenciar Livros</button>
             <button class="tab-btn admin-only hidden" data-tab="tabLeitores">Base de Leitores</button>
@@ -89,16 +121,15 @@
 
         <section id="tabAcervo" class="content-panel tab-content active">
             <div class="panel-header">
-                <div>
-                    <h2>Acervo Bibliográfico</h2>
-                    <p>Pesquisa em tempo real por título, autor, categoria ou registro ISBN.</p>
-                </div>
+                <span class="panel-eyebrow">Seção I</span>
+                <h2>Acervo Bibliográfico</h2>
+                <p>Pesquisa em tempo real por título, autor, categoria ou registro ISBN.</p>
             </div>
             <div class="filter-toolbar">
                 <div class="search-wrapper">
-                    <input type="text" id="buscaLivro" placeholder="Digite para filtrar o acervo...">
+                    <input type="text" id="buscaLivro" placeholder="Buscar por título, autor, categoria ou ISBN" aria-label="Buscar no acervo">
                 </div>
-                <select id="filtroDisponibilidade" class="select-styled">
+                <select id="filtroDisponibilidade" class="select-styled" aria-label="Filtrar disponibilidade">
                     <option value="todos">Todos os registros</option>
                     <option value="disponiveis">Disponíveis para retirada</option>
                 </select>
@@ -113,7 +144,7 @@
                             <th>Categoria</th>
                             <th>Disponibilidade</th>
                             <th>Status</th>
-                            <th>Ações</th>
+                            <th class="admin-only hidden">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaAcervo"></tbody>
@@ -123,13 +154,14 @@
 
         <section id="tabLivros" class="content-panel tab-content">
             <div class="panel-header">
+                <span class="panel-eyebrow">Seção II</span>
                 <h2>Cadastro de Novo Título</h2>
                 <p>Insira as especificações da obra para inclusão imediata no sistema.</p>
             </div>
             <form id="formLivro" class="form-grid">
                 <div class="input-group">
                     <label for="livroIsbn">ISBN</label>
-                    <input type="text" id="livroIsbn" placeholder="000-00-000-0000-0" required>
+                    <input type="text" id="livroIsbn" class="input-mono" placeholder="000-00-000-0000-0" required>
                 </div>
                 <div class="input-group">
                     <label for="livroTitulo">Título</label>
@@ -145,7 +177,7 @@
                 </div>
                 <div class="input-group">
                     <label for="livroQtd">Quantidade</label>
-                    <input type="number" id="livroQtd" min="1" placeholder="1" required>
+                    <input type="number" id="livroQtd" class="input-mono" min="1" placeholder="1" required>
                 </div>
                 <div class="input-group full-span">
                     <button type="submit" class="btn btn-primary">Adicionar ao Acervo</button>
@@ -156,6 +188,7 @@
 
         <section id="tabLeitores" class="content-panel tab-content">
             <div class="panel-header">
+                <span class="panel-eyebrow">Seção III</span>
                 <h2>Registro de Leitor</h2>
                 <p>Cadastre novos usuários com validação de CPF e dados de contato.</p>
             </div>
@@ -166,7 +199,7 @@
                 </div>
                 <div class="input-group">
                     <label for="leitorCpf">CPF</label>
-                    <input type="text" id="leitorCpf" placeholder="Apenas números" maxlength="11" required>
+                    <input type="text" id="leitorCpf" class="input-mono" placeholder="Apenas números" maxlength="11" inputmode="numeric" required>
                 </div>
                 <div class="input-group">
                     <label for="leitorEmail">E-mail Institucional</label>
@@ -201,6 +234,7 @@
 
         <section id="tabEmprestimos" class="content-panel tab-content">
             <div class="panel-header">
+                <span class="panel-eyebrow">Seção IV</span>
                 <h2>Gestão de Empréstimos</h2>
                 <p>Vincule exemplares a leitores ativos e controle prazos de devolução.</p>
             </div>
@@ -219,7 +253,7 @@
                 </div>
                 <div class="input-group">
                     <label for="dataPrevista">Data Limite de Devolução</label>
-                    <input type="date" id="dataPrevista" required>
+                    <input type="date" id="dataPrevista" class="input-mono" required>
                 </div>
                 <div class="input-group full-span">
                     <button type="submit" class="btn btn-primary">Efetivar Empréstimo</button>
@@ -234,8 +268,8 @@
                     <h3>Registro de Movimentações</h3>
                 </div>
                 <div class="simulator-box">
-                    <label for="dataSimulacaoDevolucao">Simular Data de Retorno:</label>
-                    <input type="date" id="dataSimulacaoDevolucao">
+                    <label for="dataSimulacaoDevolucao">Simular Data de Retorno</label>
+                    <input type="date" id="dataSimulacaoDevolucao" class="input-mono">
                 </div>
             </div>
             <div class="table-container">
@@ -257,6 +291,13 @@
             </div>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span class="footer-brand">Biblioteca Central</span>
+            <span class="footer-note">Sistema de Gestão de Acervo &middot; APS</span>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
