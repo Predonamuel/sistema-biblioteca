@@ -52,7 +52,7 @@ O presente documento especifica a arquitetura, as regras de negócio, a engenhar
 ## 4. Modelagem Comportamental (Casos de Uso)
 
 ### 4.1. Diagrama de Casos de Uso
-![Diagrama de Casos de Uso](./diagramas/casos-de-uso.jpeg)
+![Diagrama de Casos de Uso](./diagramas/casos%20de%20uso.jpeg)
 
 ### 4.2. Especificação Textual de Casos de Uso
 
@@ -83,7 +83,7 @@ O presente documento especifica a arquitetura, as regras de negócio, a engenhar
 ## 5. Modelagem Estrutural (Diagrama de Classes)
 
 ### 5.1. Diagrama de Classes de Projeto
-![Diagrama de Classes de Projeto](./diagramas/classes-de-projeto.jpeg)
+![Diagrama de Classes de Projeto](./diagramas/classes%20de%20projeto.jpeg)
 
 ### 5.2. Dicionário de Classes e Relacionamentos
 * **Bibliotecario:** Representa o operador administrativo (`-ID: int`, `-Nome: String`, `-Matricula: String`, `-Senha: String`, `+autenticar(Matricula: String, Senha: String): boolean`). Relaciona-se com `Emprestimo` na cardinalidade `1` para `0..*` (*Registra*).
