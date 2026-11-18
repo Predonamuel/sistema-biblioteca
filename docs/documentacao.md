@@ -1,88 +1,92 @@
 # Documentação de Análise e Projeto — Sistema de Biblioteca
 
 ## 1. Introdução e Escopo
-O presente documento detalha a especificação, modelagem de requisitos e arquitetura de classes do **Sistema de Biblioteca**, aplicação web desenvolvida para automatizar o controle de acervo, o cadastro e histórico de leitores, a autenticação administrativa e o fluxo completo de empréstimos, renovações e devoluções com cálculo automático de multas por atraso.
+O presente documento especifica a arquitetura, as regras de negócio, a engenharia de requisitos e a modelagem estrutural e comportamental do **Sistema de Biblioteca (Biblioteca Central)**. A aplicação foi projetada para automatizar a consulta pública do acervo bibliográfico, a autenticação restrita do corpo administrativo, o controle cadastral de leitores e exemplares, e o ciclo operacional completo de empréstimos, renovações e devoluções com cálculo automático de encargos por atraso.
 
 ---
 
-## 2. Engenharia de Requisitos
+## 2. Regras de Negócio (RN)
 
-### 2.1. Visão de Requisitos de Usuário e de Sistema
-* **Requisito de Usuário:** O sistema deve permitir que leitores e bibliotecários pesquisem livros no acervo, e que o bibliotecário gerencie cadastros, histórico de empréstimos, renovações e devoluções de forma centralizada.
-* **Requisito de Sistema:** O sistema deve filtrar a base de dados de livros por título, autor, categoria ou ISBN em até 2 segundos, persistir os dados localmente no navegador, calcular multas de atraso e permitir a extensão de prazos por meio de renovações.
-
-### 2.2. Requisitos Funcionais (RF)
-* **RF01 — Consultar Acervo:** Permitir a pesquisa em tempo real de livros por título, autor, categoria ou ISBN, exibindo estoque disponível e status.
-* **RF02 — Autenticar no Sistema:** Exigir matrícula e senha do Bibliotecário para liberar o painel administrativo e restrições de escrita/exclusão.
-* **RF03 — Cadastrar Livro:** Permitir ao Bibliotecário registrar novos livros ou incrementar estoque de títulos existentes, além de excluir livros sem empréstimos ativos.
-* **RF04 — Cadastrar Leitor:** Permitir ao Bibliotecário registrar novos leitores com nome completo, CPF validado (11 dígitos) e e-mail.
-* **RF05 — Gerenciar Leitores:** Permitir a exclusão segura de leitores sem empréstimos ativos e a consulta ao histórico individual de movimentações.
-* **RF06 — Realizar Empréstimo:** Permitir vincular um livro disponível a um leitor cadastrado, registrando a data de retirada e a data prevista de devolução.
-* **RF07 — Verificar Disponibilidade:** Validar automaticamente se há exemplares em estoque antes de concluir um empréstimo.
-* **RF08 — Renovar Empréstimo:** Permitir ao Bibliotecário estender o prazo de devolução de um empréstimo ativo por mais 7 dias.
-* **RF09 — Registrar Devolução:** Permitir registrar o retorno do exemplar emprestado, alterando o status para concluído e incrementando o estoque.
-* **RF10 — Emitir Alerta de Multa:** Calcular e exibir alerta financeiro caso a data de devolução ultrapasse o prazo previsto.
-
-### 2.3. Requisitos Não Funcionais (RNF)
-* **RNF01 (De Produto — Desempenho):** As buscas e filtros no catálogo devem responder instantaneamente (abaixo de 2 segundos).
-* **RNF02 (De Produto — Usabilidade):** Interface web responsiva organizada em painéis estatísticos e abas funcionais.
-* **RNF03 (Externos — Legais/LGPD):** Restrição de acesso aos dados cadastrais de leitores mediante autenticação do bibliotecário.
-* **RNF04 (Organizacionais — Versionamento):** Versionamento do código-fonte e da documentação no Git utilizando o padrão *Conventional Commits*.
+* **RN01 — Unicidade Cadastral por CPF:** Cada leitor é identificado univocamente pelo seu Cadastro de Pessoa Física (CPF), composto rigorosamente por 11 dígitos numéricos, bloqueando duplicidades na base.
+* **RN02 — Consolidação de Estoque por ISBN:** Ao cadastrar um livro cujo código ISBN já exista no acervo, o sistema incrementa a quantidade disponível no título existente em vez de duplicar o registro.
+* **RN03 — Bloqueio de Empréstimo sem Saldo:** Nenhum empréstimo pode ser efetivado caso o atributo `qtdDisponivel` do livro selecionado seja igual ou inferior a zero.
+* **RN04 — Prazo Padrão e Renovação:** O prazo padrão sugerido para devolução é de 7 dias corridos a partir da retirada. Empréstimos com status `Ativo` podem ser renovados por mais 7 dias antes do encerramento.
+* **RN05 — Cálculo de Multa por Atraso:** Caso a devolução real ocorra após a data prevista, o sistema aplica multa automática de **R$ 2,50 por dia de atraso**.
+* **RN06 — Integridade Referencial na Exclusão:** O sistema impede a exclusão de qualquer livro ou leitor que possua movimentações com status `Ativo`.
 
 ---
 
-## 3. Modelagem de Casos de Uso
+## 3. Engenharia de Requisitos
 
-### 3.1. Diagrama de Casos de Uso
-O diagrama de Casos de Uso contendo a fronteira do sistema, os atores `Leitor` e `Bibliotecário`, além das relações `<<include>>` e `<<extend>>`, está salvo em `./diagramas/casos-de-uso.jpg`.
+### 3.1. Requisitos Funcionais (RF)
+* **RF01 — Consultar Acervo:** Permitir a pesquisa em tempo real de livros por título, autor, categoria ou ISBN, com filtro adicional por disponibilidade.
+* **RF02 — Autenticar no Sistema:** Validar matrícula e senha do Bibliotecário para liberar as interfaces administrativas de escrita e exclusão.
+* **RF03 — Cadastrar Livro:** Permitir ao Bibliotecário registrar novos livros ou adicionar exemplares a um ISBN já existente, além de excluir obras sem empréstimos ativos.
+* **RF04 — Cadastrar Leitor:** Permitir ao Bibliotecário registrar novos leitores com nome completo, CPF validado e e-mail institucional.
+* **RF05 — Gerenciar Leitores e Histórico:** Permitir a exclusão segura de leitores sem pendências e a visualização do histórico individual de empréstimos.
+* **RF06 — Realizar Empréstimo:** Vincular um livro disponível a um leitor cadastrado, registrando a data de retirada e o prazo previsto de devolução.
+* **RF07 — Verificar Disponibilidade:** Validar automaticamente se há exemplares disponíveis em estoque antes de confirmar o empréstimo.
+* **RF08 — Renovar Empréstimo:** Estender em 7 dias o prazo previsto de devolução de um empréstimo ativo.
+* **RF09 — Registrar Devolução:** Registrar o retorno do exemplar, alterar o status para `Devolvido` e incrementar o estoque disponível.
+* **RF10 — Emitir Alerta de Multa:** Calcular o encargo financeiro em caso de atraso e exibir alerta imediato na devolução.
 
-### 3.2. Especificação Textual de Casos de Uso
+### 3.2. Requisitos Não Funcionais (RNF)
+* **RNF01 (Desempenho):** Filtragem e renderização instantânea do catálogo (tempo de resposta inferior a 2 segundos).
+* **RNF02 (Persistência):** Armazenamento local contínuo via `localStorage` e controle de sessão administrativa via `sessionStorage`.
+* **RNF03 (Segurança e LGPD):** Ocultação e bloqueio das rotas e dados pessoais de leitores para usuários não autenticados.
+* **RNF04 (Manutenibilidade):** Arquitetura desacoplada entre estrutura (`index.html`), apresentação (`style.css`) e lógica (`script.js`), versionada com *Conventional Commits*.
+
+### 3.3. Matriz de Rastreabilidade
+| Requisito | Caso de Uso / Classe | Função no Código (`script.js`) |
+| :--- | :--- | :--- |
+| RF01 | Consultar Acervo / `Livro` | `renderizarAcervo()` |
+| RF02 | Autenticar no Sistema / `Bibliotecario` | `atualizarInterfaceAuth()` |
+| RF03 | Cadastrar Livro / `Livro` | `formLivro` (`submit`), `excluirLivro()` |
+| RF04 / RF05 | Cadastro Leitor / `Leitor` | `formLeitor` (`submit`), `validarCPF()`, `abrirHistoricoLeitor()` |
+| RF06 / RF07 | Realizar Empréstimo / `Emprestimo` | `formEmprestimo` (`submit`) |
+| RF08 | Renovar Empréstimo / `Emprestimo` | `renovarEmprestimo()` |
+| RF09 / RF10 | Registrar Devolução / `Emprestimo` | `registrarDevolucao()`, `calcularMulta()` |
+
+---
+
+## 4. Modelagem Comportamental (Casos de Uso)
+
+### 4.1. Diagrama de Casos de Uso
+![Diagrama de Casos de Uso](./diagramas/casos-de-uso.jpeg)
+
+### 4.2. Especificação Textual de Casos de Uso
 
 #### Caso de Uso 01: Realizar Empréstimo
-| Campo | Conteúdo |
+| Campo | Descrição |
 | :--- | :--- |
 | **Nome** | Realizar Empréstimo |
-| **Ator(es)** | Bibliotecário |
-| **Descrição** | O bibliotecário registra a retirada de um exemplar do acervo para um leitor cadastrado. |
-| **Pré-condições** | Bibliotecário autenticado no painel administrativo e leitor previamente cadastrado. |
-| **Fluxo Principal** | 1. O bibliotecário seleciona o leitor cadastrado pelo CPF.<br>2. O bibliotecário seleciona o livro desejado.<br>3. O sistema executa a verificação de disponibilidade.<br>4. O bibliotecário define a data prevista de devolução.<br>5. O sistema registra o empréstimo, reduz o estoque disponível e atualiza a listagem. |
-| **Fluxos Alternativos** | 1a. O bibliotecário pode cadastrar um novo leitor na aba de Gerenciamento de Leitores caso ele ainda não possua registro. |
-| **Exceções** | 3a. Caso o livro possua 0 exemplares disponíveis, o sistema bloqueia o empréstimo e exibe alerta. |
-| **Pós-condições** | O empréstimo passa a constar como "Ativo" e a quantidade disponível do livro é decrementada em 1 unidade. |
+| **Ator Principal** | Bibliotecário |
+| **Pré-condições** | Bibliotecário autenticado no sistema e leitor previamente cadastrado. |
+| **Fluxo Principal** | 1. O bibliotecário seleciona o leitor cadastrado.<br>2. O bibliotecário seleciona a obra desejada.<br>3. O sistema executa a inclusão `<<include>>` **Verificar Disponibilidade**.<br>4. O bibliotecário confirma a data limite de devolução.<br>5. O sistema efetiva o empréstimo com status `Ativo` e reduz `qtdDisponivel` em 1 unidade. |
+| **Fluxo Alternativo** | 1a. Caso o leitor não possua cadastro, o bibliotecário realiza o registro na aba de Base de Leitores antes de prosseguir. |
+| **Fluxo de Exceção** | 3a. Caso `qtdDisponivel` seja igual a 0, o sistema bloqueia a seleção e impede o registro. |
+| **Pós-condições** | O empréstimo passa a constar na tabela de movimentações ativas e o saldo do acervo é atualizado. |
 
-#### Caso de Uso 02: Renovar Empréstimo
-| Campo | Conteúdo |
-| :--- | :--- |
-| **Nome** | Renovar Empréstimo |
-| **Ator(es)** | Bibliotecário |
-| **Descrição** | O bibliotecário estende o prazo de um empréstimo ativo por mais 7 dias. |
-| **Pré-condições** | Existir um empréstimo com status "Ativo". |
-| **Fluxo Principal** | 1. O bibliotecário localiza o empréstimo ativo na tabela de controle.<br>2. O bibliotecário aciona a opção de renovação.<br>3. O sistema adiciona 7 dias à data prevista de devolução atual e atualiza o registro. |
-| **Fluxos Alternativos** | — |
-| **Exceções** | — |
-| **Pós-condições** | A data prevista de devolução é estendida com sucesso. |
-
-#### Caso de Uso 03: Registrar Devolução
-| Campo | Conteúdo |
+#### Caso de Uso 02: Registrar Devolução
+| Campo | Descrição |
 | :--- | :--- |
 | **Nome** | Registrar Devolução |
-| **Ator(es)** | Bibliotecário |
-| **Descrição** | O bibliotecário registra o retorno de um livro emprestado ao acervo. |
-| **Pré-condições** | Existir um empréstimo com status "Ativo". |
-| **Fluxo Principal** | 1. O bibliotecário localiza o empréstimo na tabela de movimentações ativas.<br>2. O bibliotecário aciona a opção de devolução.<br>3. O sistema registra a data real de devolução, calcula eventuais multas por atraso e incrementa o estoque do livro. |
-| **Fluxos Alternativos** | — |
-| **Exceções** | 2a. Se a data real for posterior à data prevista, o sistema aciona o cálculo e emissão de alerta de multa por atraso. |
-| **Pós-condições** | O empréstimo é encerrado e o exemplar retorna ao estoque disponível no catálogo. |
+| **Ator Principal** | Bibliotecário |
+| **Pré-condições** | Existir um empréstimo com status `Ativo`. |
+| **Fluxo Principal** | 1. O bibliotecário localiza o empréstimo ativo na tabela de movimentações.<br>2. O bibliotecário aciona a operação de devolução.<br>3. O sistema registra `dataDevolucaoReal`, altera o status para `Devolvido` e incrementa `qtdDisponivel` em 1 unidade. |
+| **Fluxo Alternativo** | 2a. Antes da devolução, o bibliotecário pode acionar a renovação para estender o prazo em 7 dias. |
+| **Fluxo de Exceção** | 3a. Se `dataDevolucaoReal` for posterior a `dataPrevistaDevolucao`, o sistema aciona a extensão `<<extend>>` **Emitir Alerta de Multa**, calculando R$ 2,50 por dia de atraso. |
+| **Pós-condições** | O exemplar retorna ao saldo disponível do acervo e o registro fica encerrado. |
 
 ---
 
-## 4. Modelagem Estrutural (Diagrama de Classes)
+## 5. Modelagem Estrutural (Diagrama de Classes)
 
-### 4.1. Diagrama de Classes de Projeto
-O diagrama de Classes de Projeto está salvo em `./diagramas/diagrama-classes.jpg`.
+### 5.1. Diagrama de Classes de Projeto
+![Diagrama de Classes de Projeto](./diagramas/classes-de-projeto.jpeg)
 
-### 4.2. Dicionário de Classes
-* **Bibliotecario:** Controla o acesso administrativo e gerencia as operações (`-matricula: String`, `-senha: String`, `+autenticar(): boolean`).
-* **Leitor:** Armazena os dados cadastrais e permite rastreio de histórico (`-cpf: String`, `-nome: String`, `-email: String`, `+validarCPF(): boolean`, `+consultarHistorico(): List`).
-* **Emprestimo:** Gerencia as retiradas, prazos, renovações, devoluções e cálculo de multas (`-idEmprestimo: int`, `-dataEmprestimo: Date`, `-dataDevolucaoPrevista: Date`, `-dataDevolucaoReal: Date`, `-status: String`, `+calcularMulta(): double`, `+renovarPrazo(): void`, `+registrarDevolucao(): void`).
-* **Livro:** Gerencia os títulos, categorias e o saldo de exemplares (`-isbn: String`, `-titulo: String`, `-autor: String`, `-categoria: String`, `-exemplarDisponivel: int`, `+verificarDisponibilidade(): boolean`, `+atualizarEstoque(): void`).
+### 5.2. Dicionário de Classes e Relacionamentos
+* **Bibliotecario:** Representa o operador administrativo (`-ID: int`, `-Nome: String`, `-Matricula: String`, `-Senha: String`, `+autenticar(Matricula: String, Senha: String): boolean`). Relaciona-se com `Emprestimo` na cardinalidade `1` para `0..*` (*Registra*).
+* **Leitor:** Representa o usuário habilitado a retirar obras (`-ID: int`, `-Nome: String`, `-CPF: String`, `-Email: String`, `+validarCPF(): boolean`, `+consultarHistorico(): List`). Relaciona-se com `Livro` na cardinalidade `1` para `1..*` (*Realiza*).
+* **Emprestimo:** Controla o ciclo de vida da movimentação (`-ID: int`, `-dataRetirada: Date`, `-dataPrevistaDevolucao: Date`, `-dataDevolucaoReal: Date`, `-Status: String`, `+calcularMulta(): double`, `+finalizarDevolucao(): void`). Possui agregação com `Livro` (`1` para `1..*`).
+* **Livro:** Representa as obras catalogadas no acervo (`-isbn: String`, `-Titulo: String`, `-Autor: String`, `-Categoria: String`, `-qtdDisponivel: int`, `+verificarDisponibilidade(): boolean`, `+atualizarEstoque(qtd: int): void`).

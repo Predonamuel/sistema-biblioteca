@@ -3,149 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiblioTech — Sistema de Gestão de Biblioteca</title>
+    <title>Biblioteca Central — Sistema de Gestão</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="brand">
-                <div class="brand-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1>BiblioTech</h1>
-                    <span class="brand-sub">Sistema de Gestão de Biblioteca</span>
-                </div>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand-group">
+                <span class="brand-badge">Sistema</span>
+                <h1>Biblioteca Central</h1>
             </div>
-            <div id="authArea">
+            <div class="auth-toolbar" id="authArea">
                 <span id="statusAdmin" class="badge badge-offline">Modo Leitor</span>
-                <button id="btnAbrirLogin" class="btn-primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Acesso Bibliotecário
-                </button>
-                <button id="btnLogout" class="btn-danger hidden">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                    Sair
-                </button>
+                <button id="btnAbrirLogin" class="btn btn-secondary">Acesso Administrativo</button>
+                <button id="btnLogout" class="btn btn-danger hidden">Encerrar Sessão</button>
             </div>
         </div>
     </header>
 
-    <div id="modalLogin" class="modal hidden">
-        <div class="modal-content">
+    <div id="modalLogin" class="modal-backdrop hidden">
+        <div class="modal-card">
             <div class="modal-header">
-                <h2>Autenticar Bibliotecário</h2>
-                <p class="hint">Credenciais: Matrícula <strong>admin</strong> • Senha <strong>1234</strong></p>
+                <h2>Credenciais de Acesso</h2>
+                <p class="modal-subtitle">Utilize sua matrícula administrativa para gerenciar o acervo.</p>
             </div>
             <div class="modal-body">
-                <div class="field">
+                <div class="input-group">
                     <label for="loginMatricula">Matrícula</label>
-                    <input type="text" id="loginMatricula" placeholder="Digite sua matrícula">
+                    <input type="text" id="loginMatricula" placeholder="admin">
                 </div>
-                <div class="field">
+                <div class="input-group">
                     <label for="loginSenha">Senha</label>
                     <input type="password" id="loginSenha" placeholder="••••••••">
                 </div>
             </div>
-            <div class="modal-actions">
-                <button id="btnCancelarLogin" class="btn-ghost">Cancelar</button>
-                <button id="btnConfirmarLogin" class="btn-primary">Entrar no Sistema</button>
+            <div class="modal-footer">
+                <button id="btnCancelarLogin" class="btn btn-ghost">Cancelar</button>
+                <button id="btnConfirmarLogin" class="btn btn-primary">Autenticar</button>
             </div>
-            <p id="msgLogin" class="msg"></p>
+            <p id="msgLogin" class="feedback-text"></p>
         </div>
     </div>
 
-    <div id="modalHistorico" class="modal hidden">
-        <div class="modal-content modal-large">
+    <div id="modalHistorico" class="modal-backdrop hidden">
+        <div class="modal-card modal-wide">
             <div class="modal-header">
-                <h2>Histórico de Empréstimos</h2>
+                <h2>Histórico do Leitor</h2>
             </div>
-            <div id="conteudoHistoricoLeitor" class="modal-body"></div>
-            <div class="modal-actions">
-                <button id="btnFecharHistorico" class="btn-secondary">Fechar</button>
+            <div id="conteudoHistoricoLeitor" class="modal-body scrollable"></div>
+            <div class="modal-footer">
+                <button id="btnFecharHistorico" class="btn btn-secondary">Fechar</button>
             </div>
         </div>
     </div>
 
-    <main class="container">
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Títulos no Acervo</span>
-                    <div class="stat-icon icon-indigo">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                    </div>
-                </div>
-                <strong id="statTotalLivros">0</strong>
+    <main class="main-container">
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Títulos Cadastrados</span>
+                <strong class="metric-value" id="statTotalLivros">0</strong>
             </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Exemplares Disponíveis</span>
-                    <div class="stat-icon icon-emerald">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                </div>
-                <strong id="statDisponiveis">0</strong>
+            <div class="metric-card">
+                <span class="metric-label">Exemplares Disponíveis</span>
+                <strong class="metric-value" id="statDisponiveis">0</strong>
             </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Leitores Cadastrados</span>
-                    <div class="stat-icon icon-blue">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                </div>
-                <strong id="statTotalLeitores">0</strong>
+            <div class="metric-card">
+                <span class="metric-label">Leitores Registrados</span>
+                <strong class="metric-value" id="statTotalLeitores">0</strong>
             </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Empréstimos Ativos</span>
-                    <div class="stat-icon icon-amber">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
-                </div>
-                <strong id="statEmprestimosAtivos">0</strong>
+            <div class="metric-card">
+                <span class="metric-label">Empréstimos Ativos</span>
+                <strong class="metric-value" id="statEmprestimosAtivos">0</strong>
             </div>
         </section>
 
-        <nav class="tabs">
+        <nav class="navigation-tabs">
             <button class="tab-btn active" data-tab="tabAcervo">Consultar Acervo</button>
-            <button class="tab-btn admin-only hidden" data-tab="tabLivros">Cadastrar Livros</button>
-            <button class="tab-btn admin-only hidden" data-tab="tabLeitores">Gerenciar Leitores</button>
-            <button class="tab-btn admin-only hidden" data-tab="tabEmprestimos">Empréstimos e Devoluções</button>
+            <button class="tab-btn admin-only hidden" data-tab="tabLivros">Gerenciar Livros</button>
+            <button class="tab-btn admin-only hidden" data-tab="tabLeitores">Base de Leitores</button>
+            <button class="tab-btn admin-only hidden" data-tab="tabEmprestimos">Controle de Empréstimos</button>
         </nav>
 
-        <section id="tabAcervo" class="tab-content active card">
-            <div class="card-header">
-                <h2>Catálogo de Livros</h2>
-                <p class="card-desc">Pesquise obras disponíveis no acervo por título, autor, categoria ou código ISBN.</p>
-            </div>
-            <div class="search-bar">
-                <div class="search-input-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input type="text" id="buscaLivro" placeholder="Pesquisar por título, autor, categoria ou ISBN...">
+        <section id="tabAcervo" class="content-panel tab-content active">
+            <div class="panel-header">
+                <div>
+                    <h2>Acervo Bibliográfico</h2>
+                    <p>Pesquisa em tempo real por título, autor, categoria ou registro ISBN.</p>
                 </div>
-                <select id="filtroDisponibilidade">
-                    <option value="todos">Todos os livros</option>
-                    <option value="disponiveis">Apenas disponíveis</option>
+            </div>
+            <div class="filter-toolbar">
+                <div class="search-wrapper">
+                    <input type="text" id="buscaLivro" placeholder="Digite para filtrar o acervo...">
+                </div>
+                <select id="filtroDisponibilidade" class="select-styled">
+                    <option value="todos">Todos os registros</option>
+                    <option value="disponiveis">Disponíveis para retirada</option>
                 </select>
             </div>
-            <div class="table-wrapper">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>ISBN</th>
-                            <th>Título</th>
+                            <th>Título da Obra</th>
                             <th>Autor</th>
                             <th>Categoria</th>
-                            <th>Disponíveis</th>
+                            <th>Disponibilidade</th>
                             <th>Status</th>
-                            <th class="admin-only hidden">Ação</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaAcervo"></tbody>
@@ -153,74 +121,76 @@
             </div>
         </section>
 
-        <section id="tabLivros" class="tab-content card">
-            <div class="card-header">
-                <h2>Cadastrar Novo Livro</h2>
-                <p class="card-desc">Adicione novas obras ao catálogo ou atualize o estoque de um ISBN existente.</p>
+        <section id="tabLivros" class="content-panel tab-content">
+            <div class="panel-header">
+                <h2>Cadastro de Novo Título</h2>
+                <p>Insira as especificações da obra para inclusão imediata no sistema.</p>
             </div>
             <form id="formLivro" class="form-grid">
-                <div class="field">
-                    <label for="livroIsbn">Código ISBN</label>
-                    <input type="text" id="livroIsbn" placeholder="Ex: 978-8535236996" required>
+                <div class="input-group">
+                    <label for="livroIsbn">ISBN</label>
+                    <input type="text" id="livroIsbn" placeholder="000-00-000-0000-0" required>
                 </div>
-                <div class="field">
-                    <label for="livroTitulo">Título da Obra</label>
-                    <input type="text" id="livroTitulo" placeholder="Ex: Clean Code" required>
+                <div class="input-group">
+                    <label for="livroTitulo">Título</label>
+                    <input type="text" id="livroTitulo" placeholder="Nome da obra" required>
                 </div>
-                <div class="field">
+                <div class="input-group">
                     <label for="livroAutor">Autor</label>
-                    <input type="text" id="livroAutor" placeholder="Ex: Robert C. Martin" required>
+                    <input type="text" id="livroAutor" placeholder="Nome do autor" required>
                 </div>
-                <div class="field">
+                <div class="input-group">
                     <label for="livroCategoria">Categoria</label>
-                    <input type="text" id="livroCategoria" placeholder="Ex: Tecnologia" required>
+                    <input type="text" id="livroCategoria" placeholder="Área de conhecimento" required>
                 </div>
-                <div class="field">
-                    <label for="livroQtd">Quantidade de Exemplares</label>
-                    <input type="number" id="livroQtd" placeholder="Ex: 3" min="1" required>
+                <div class="input-group">
+                    <label for="livroQtd">Quantidade</label>
+                    <input type="number" id="livroQtd" min="1" placeholder="1" required>
                 </div>
-                <div class="field field-btn">
-                    <button type="submit" class="btn-primary full-width">Salvar no Acervo</button>
+                <div class="input-group full-span">
+                    <button type="submit" class="btn btn-primary">Adicionar ao Acervo</button>
                 </div>
             </form>
-            <p id="msgLivro" class="msg"></p>
+            <p id="msgLivro" class="feedback-text"></p>
         </section>
 
-        <section id="tabLeitores" class="tab-content card">
-            <div class="card-header">
-                <h2>Cadastrar Leitor</h2>
-                <p class="card-desc">Registre novos usuários habilitados a realizar empréstimos na biblioteca.</p>
+        <section id="tabLeitores" class="content-panel tab-content">
+            <div class="panel-header">
+                <h2>Registro de Leitor</h2>
+                <p>Cadastre novos usuários com validação de CPF e dados de contato.</p>
             </div>
             <form id="formLeitor" class="form-grid">
-                <div class="field">
+                <div class="input-group">
                     <label for="leitorNome">Nome Completo</label>
-                    <input type="text" id="leitorNome" placeholder="Ex: João Pedro Alves" required>
+                    <input type="text" id="leitorNome" placeholder="Nome do usuário" required>
                 </div>
-                <div class="field">
-                    <label for="leitorCpf">CPF (11 números)</label>
-                    <input type="text" id="leitorCpf" placeholder="00000000000" maxlength="11" required>
+                <div class="input-group">
+                    <label for="leitorCpf">CPF</label>
+                    <input type="text" id="leitorCpf" placeholder="Apenas números" maxlength="11" required>
                 </div>
-                <div class="field">
-                    <label for="leitorEmail">E-mail de Contato</label>
-                    <input type="email" id="leitorEmail" placeholder="joao@email.com" required>
+                <div class="input-group">
+                    <label for="leitorEmail">E-mail Institucional</label>
+                    <input type="email" id="leitorEmail" placeholder="usuario@email.com" required>
                 </div>
-                <div class="field field-btn">
-                    <button type="submit" class="btn-primary full-width">Cadastrar Leitor</button>
+                <div class="input-group full-span">
+                    <button type="submit" class="btn btn-primary">Cadastrar Leitor</button>
                 </div>
             </form>
-            <p id="msgLeitor" class="msg"></p>
+            <p id="msgLeitor" class="feedback-text"></p>
 
-            <div class="section-divider"></div>
+            <div class="divider"></div>
 
-            <h3>Leitores Cadastrados</h3>
-            <div class="table-wrapper">
+            <div class="panel-header sub-header">
+                <h3>Usuários Cadastrados</h3>
+            </div>
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>CPF</th>
                             <th>Nome</th>
                             <th>E-mail</th>
-                            <th>Ativos</th>
+                            <th>Empréstimos Ativos</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -229,55 +199,57 @@
             </div>
         </section>
 
-        <section id="tabEmprestimos" class="tab-content card">
-            <div class="card-header">
-                <h2>Registrar Novo Empréstimo</h2>
-                <p class="card-desc">Vincule um exemplar disponível a um leitor cadastrado e defina o prazo de devolução.</p>
+        <section id="tabEmprestimos" class="content-panel tab-content">
+            <div class="panel-header">
+                <h2>Gestão de Empréstimos</h2>
+                <p>Vincule exemplares a leitores ativos e controle prazos de devolução.</p>
             </div>
             <form id="formEmprestimo" class="form-grid">
-                <div class="field">
-                    <label for="selectLeitor">Leitor</label>
-                    <select id="selectLeitor" required>
-                        <option value="">Selecione o Leitor...</option>
+                <div class="input-group">
+                    <label for="selectLeitor">Leitor Selecionado</label>
+                    <select id="selectLeitor" class="select-styled" required>
+                        <option value="">Selecione o leitor...</option>
                     </select>
                 </div>
-                <div class="field">
+                <div class="input-group">
                     <label for="selectLivro">Livro Disponível</label>
-                    <select id="selectLivro" required>
-                        <option value="">Selecione o Livro...</option>
+                    <select id="selectLivro" class="select-styled" required>
+                        <option value="">Selecione o livro...</option>
                     </select>
                 </div>
-                <div class="field">
-                    <label for="dataPrevista">Devolução Prevista</label>
+                <div class="input-group">
+                    <label for="dataPrevista">Data Limite de Devolução</label>
                     <input type="date" id="dataPrevista" required>
                 </div>
-                <div class="field field-btn">
-                    <button type="submit" class="btn-primary full-width">Confirmar Empréstimo</button>
+                <div class="input-group full-span">
+                    <button type="submit" class="btn btn-primary">Efetivar Empréstimo</button>
                 </div>
             </form>
-            <p id="msgEmprestimo" class="msg"></p>
+            <p id="msgEmprestimo" class="feedback-text"></p>
 
-            <div class="section-divider"></div>
+            <div class="divider"></div>
 
-            <div class="control-bar">
-                <h3>Controle de Empréstimos e Devoluções</h3>
-                <div class="sim-box">
-                    <label for="dataSimulacaoDevolucao">Data de Devolução (Simulador de Atraso):</label>
+            <div class="action-row">
+                <div class="panel-header sub-header">
+                    <h3>Registro de Movimentações</h3>
+                </div>
+                <div class="simulator-box">
+                    <label for="dataSimulacaoDevolucao">Simular Data de Retorno:</label>
                     <input type="date" id="dataSimulacaoDevolucao">
                 </div>
             </div>
-            <div class="table-wrapper">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Leitor</th>
-                            <th>Livro</th>
+                            <th>Obra</th>
                             <th>Retirada</th>
-                            <th>Prevista</th>
-                            <th>Status</th>
-                            <th>Multa</th>
-                            <th>Ações</th>
+                            <th>Prazo</th>
+                            <th>Estado</th>
+                            <th>Multa Calculada</th>
+                            <th>Operações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaEmprestimos"></tbody>
